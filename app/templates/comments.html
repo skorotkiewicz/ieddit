@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if post.override == False %}
+    {% if post.anonymous %}
+        {% set pauthor = 'Anonymous' %}
+        {% set pauthor_type = 'user' %}
+    {% else %}
+        {% set pauthor = post.author %}
+        {% set pauthor_type = post.author_type %}
+    {% endif %}
+{% endif %}
+
+<title>{{ post.title }}</title>
+<meta property="og:title" content="{{ post.title }}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ post.get_permalink() }}" />
+
+{% if post.remote_image_url %}
+    <meta property="og:image" content="{{ post.remote_image_url }}" />
+{% else %}
+    {% if post.post_type == 'url' %}
+        <meta property="og:image" content="{{ config.URL }}/static/globe.png" />
+    {% else %}
+        <meta property="og:image" content="/static/comment-white.png" />
+    {% endif %}
+{% endif %}
+
+<div id="comment-page-wrapper">
+    {% set pre_expand = True %}
+    {% include 'sub-post.html' %}
+
+    {% if post.locked %}
+        <h2>{{ get_word('post is locked') }}</h2>
+    {% endif %}
+
+    {% if is_parent == False %}
+    
+        {% with %}
+            {% set reptype = 'post' %}
+            {% set hide_comment_reply = False %}
+            {% include 'comment-reply.html' %}
+        {% endwith %}
+    
+    
+        {% with %}
+            {% set reptype = 'comment' %}
+            {% set hide_comment_reply = True %}
+            {% include 'comment-reply.html' %}
+        {% endwith %}
+
+    {% endif %}
+    
+    <div id='comment-spacer' style='width: 100%; height: 1px; margin-bottom: 1rem;'></div>
+
+    {% if parent_comment %}
+        <h5 id='single-comment'> {{ get_word('you are viewing a single comment') }} - <a style='text-decoration: underline;' href="{{ post.get_permalink() }}">{{ get_word('view all comments') }}</a></h5>
+    {% endif %}
+
+    <ul class="list-unstyled comment-reply-list">
+        {%- for comment, value in tree.items() recursive %}  
+            {% if comment.anonymous %}
+                {% set cauthor = 'Anonymous' %}
+                {% set cauthor_type = 'user' %}
+            {% else %}
+                {% set cauthor = comment.author %}
+                {% set cauthor_type = comment.author_type %}
+            {% endif %}
+            {% if loop.depth0 < 5 %}
+                {% include 'collapsed.html' %}
+
+                {% with %}
+                    {% set cominline = True %}
+                    {% include 'comment.html' %}
+                {% endwith %}
+
+                {%- if value %}
+                    {{ loop(value.items()) }}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <p>{{ get_word('no comments') }}</p>
+        {%- endfor %}
+    </ul>
+</div>
+
+{% endblock %} 

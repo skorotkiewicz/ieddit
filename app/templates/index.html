@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% for post in posts %}
+    {% include 'sub-post.html' %}
+{% else %}
+    <p> {{ get_word('no posts') }} </p>
+{% endfor %}
+
+{% endblock %}

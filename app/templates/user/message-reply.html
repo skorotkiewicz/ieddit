@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if self_pgp %}
+{% include 'user/keys.html' %}
+{% include 'user/crypto.html' %}
+
+{% endif %}
+
+{% if message %}
+    {% include 'user/message.html' %}
+{% endif %}
+
+{% if message.sender %}
+<form id='comment-reply-box' action='/message/{{ message.sender }}' method='POST'>
+    <input type='hidden' name='message_title' value='{{ message.new_title }}'>
+    <input type='hidden' name='sent_to' value='{{ message.sender }}'>
+    <div class="comment-reply-box-wrapper">
+        <textarea id='message-textarea' class="rounded comment-reply-box-expand white-input" name="message_text"></textarea>
+    </div>
+{% else %}
+<form class='margin-lr' action='/message/{{ sendto }}' method='POST'>
+    <h2 class='message-user-top' style='margin-right: 1rem;'>
+        <i class='fa fa-envelope'></i> new message
+    </h2>
+
+    <div style='max-width: 16rem;'>
+        <label class="sr-only" for="inlineFormInputGroupUsername">Username</label>
+        <div class="input-group" style='margin-top: 0.5rem;'>
+            <div class="input-group-prepend">
+                <div class="input-group-text" style='{% if sendto %}border-radius: 0.25rem; {% endif %}padding: 0.25rem; font-size: 150%;'>
+                    <h5 style='margin-bottom: 0.25rem;'>
+                        {% if sendto %}
+                            <a href='{{ config.URL }}/u/{{ sendto }}'>
+                                <i class='fa fa-user' style='margin-right: -0.125rem;'></i>
+                                {{ sendto }}
+                            </a>  
+                        {% else %}
+                            <i class='fa fa-user'></i> /u/ 
+                        {% endif %}
+                    </h5>
+                </div>
+            </div>
+            {% if sendto %}
+                {% set u_value = 'value="' + sendto + '" disabled ' %}
+                <input value="{{ sendto }}" style="background-color:#a6a6a6!important; color: black!important;" type="hidden" name='sent_to'>
+            {% else %}
+                {% set u_class = 'white-input' %}
+                <input style="background-color:#a6a6a6!important; color: black!important;" type="text" class="bg-light form-control user-message-sendto white-input" id="inlineFormInputGroupUsername" placeholder="Enter Username" name='sent_to'>
+            {% endif %}
+        </div>
+    </div>
+
+    <br>
+    <input type='text' class='rounded white-input' style='height: 2.75rem; display:inline-block; width: 16rem;' placeholder='Hey lets talk' name='message_title'>
+    <h4 class='message-user-top' style='margin-right: 1rem; display: inline-block;'>&nbsp;subject</h4>
+
+    <div class="comment-reply-box-wrapper">
+        <textarea id='message-textarea' class="comment-reply-box-expand rounded white-input" name="message_text" placeholder='Enter Message'></textarea>
+    </div>
+
+{% endif %}
+<input class="btn btn-primary rounded" style='color: white!important;' type='submit' value='send message'>
+{% if self_pgp %}
+    {% if other_pgp.username %}
+        <button type="button" class="btn btn-sm btn-success" id="encryptMessageButton">encrypt <i class='fa fa-lock'></i></button>
+    {% endif %}
+{% endif %}
+<input name='msgencrypted' id='msgencrypted' value='' type='hidden'>
+{% if other_pgp %}
+    <input name='key_id' id='key_id' value='{{ other_pgp.id }}' type='hidden'>
+{% else %}
+    <input name='key_id' id='key_id' value='' type='hidden'>
+{% endif %}
+
+</form>
+
+{% endblock %}    

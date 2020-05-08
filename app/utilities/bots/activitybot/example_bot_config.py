@@ -1,0 +1,9 @@
+ieddit_accounts = ['user:apikey']
+bot_subreddits = ["cyberpunk", 'cityporn', 'osha','badcode','urbanhell','abandonedporn', '4chan', 'classic4chan', 'earthporn']
+aliases = {'earthporn':'travel', 'urbanhell':'travel', 'abandonedporn':'travel', 'cityporn':'travel', 'classic4chan':'4chan'}
+reddit_api = "id:secret"
+create_new_posts = True
+post_chance = 10#0 # chance to post 1 out of x
+create_new_comments = True
+comment_chance = 3# 1 out of x
+bot_interval = 1200

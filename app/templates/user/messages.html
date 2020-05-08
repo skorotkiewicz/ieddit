@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 style='display: inline-block;' class='margin-lr'>
+    <i class='fa fa-envelope'></i> {{ get_word('messages') }}
+</h2>
+
+{% if has_encrypted %}
+    {% if session['pgp_enabled'] %}
+        <textarea id='self-pgp-username' style='display: none;'>{% if self_pgp.username %}{{ self_pgp.username }}{% else %}{% endif %}</textarea>
+        <textarea id='self-pgp-privkey' style='display: none;'>{% if self_pgp.privkey %}{{ self_pgp.privkey }}{% else %}{% endif %}</textarea>
+        <textarea id='self-pgp-pubkey' style='display: none;'>{% if self_pgp.pubkey %}{{ self_pgp.pubkey }}{% else %}{% endif %}</textarea>
+
+        {% include 'user/crypto.html' %}
+    
+        <div style='display: inline-block;' class='margin-lr'>
+            <button class='btn btn-success' id='decrypt-button' style='margin-top: -1rem;'>
+                <i class='fa fa-lock'></i> {{ get_word('Decrypt Messages', caps_all=True) }} 
+            </button>
+        </div>
+    {% endif %}
+{% endif %}
+
+
+<div class='message-inbox'>
+    {% if new_messages %}
+        {% set vars = {'continue': True } %}
+        <h2 style='text-align: center;'>{{ get_word('new') }}</h2>
+    <div class='new-messages-container'>
+    {% else %}
+        {% set vars = {'continue': False } %}
+        <!-- <h2 class='margin-lr'>read</h2> -->
+    {% endif %}
+
+    {% for message in messages %}
+        <!-- Finished listing unread messages, read from here on -->
+        {% if vars['continue'] and new_messages %}
+            {% if message.was_unread != True %}
+                {% if vars.update({'continue': False }) %}{% endif %}
+                </div><!-- <h2 class='margin-lr'>read</h2> -->
+            {% endif %}
+        {% endif %}
+    
+        {% if message.encrypted == True and message.encrypted_key_id == self_pgp.id|string %}
+            {% include 'user/message.html' %}
+        {% elif message.encrypted == True and message.encrypted_key_id|string != self_pgp.id|string 
+            and message.encrypted_key_id|string != 'None' %}
+            <div>
+                <p style='color: red;'>{{ get_word('you have a encrypted messages but (probably) cannot read it.') }}
+                 {{ get_word('Sent to', cap=[0]) }}: {{ message.encrypted_key_id }} - {{ get_word('You are') }}: {{ self_pgp.id }}</p>
+            </div>
+        {% else %}
+            {% include 'user/message.html' %}
+        {% endif %}
+    
+    {% else %}
+        <p> {{ get_word('no messages') }} </p>
+    {% endfor %}
+
+    {% if request.show_more_messages %}
+        {% set base = request.environ['PATH_INFO'] %}
+        {% set query = request.environ['QUERY_STRING'] %}
+        {% set more_url = base + offset_url(query, offset_by=25) %}
+    
+        <a class="btn btn-primary margin-lr" href="{{ more_url }}">{{ get_word('show more') }}</a>
+    {% endif %}
+</div>
+
+{% endblock %}
